@@ -9,7 +9,7 @@ import * as pkg from 'esbuild';
 
 import type EsbuildServerlessPlugin from './index';
 import { asArray, assertIsString, isESM } from './helper';
-import type { EsbuildOptions, FileBuildResult, FunctionBuildResult, BuildContext } from './types';
+import type { EsbuildOptions, FileBuildResult, FunctionBuildResult } from './types';
 import { trimExtension } from './utils';
 
 const getStringArray = (input: unknown): string[] => asArray(input).filter(Predicate.isString);
@@ -114,7 +114,7 @@ export async function bundle(this: EsbuildServerlessPlugin): Promise<void> {
       );
     }
 
-    return { bundlePath, entry, result};
+    return { bundlePath, entry, result };
   };
 
   // Files can contain multiple handlers for multiple functions, we want to get only the unique ones
