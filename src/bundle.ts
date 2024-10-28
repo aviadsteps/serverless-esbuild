@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import pMap from 'p-map';
 import path from 'path';
 import { uniq } from 'ramda';
+import * as pkg from 'esbuild';
 
 import type EsbuildServerlessPlugin from './index';
 import { asArray, assertIsString, isESM } from './helper';
@@ -104,21 +105,7 @@ export async function bundle(this: EsbuildServerlessPlugin): Promise<void> {
       outdir: path.join(buildDirPath, path.dirname(entry)),
     };
 
-    const pkg = await import('esbuild');
-
-    type ContextFn = (opts: typeof options) => Promise<BuildContext>;
-    type WithContext = typeof pkg & { context?: ContextFn };
-    const context = await (pkg as WithContext).context?.(options);
-
-    let result;
-    if (!buildOptions.skipRebuild) {
-      result = await context?.rebuild();
-      if (!result) {
-        result = await pkg.build(options);
-      }
-    } else {
-      result = await pkg.build(options);
-    }
+    const result = await pkg.build?.(options);
 
     if (config.metafile) {
       fs.writeFileSync(
@@ -127,7 +114,7 @@ export async function bundle(this: EsbuildServerlessPlugin): Promise<void> {
       );
     }
 
-    return { bundlePath, entry, result, context };
+    return { bundlePath, entry, result};
   };
 
   // Files can contain multiple handlers for multiple functions, we want to get only the unique ones
